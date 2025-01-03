@@ -138,20 +138,20 @@ func (p *Player) updatePosition(dt float32) {
 	if rl.IsKeyDown(rl.KeyW) {
 		p.Velocity = rl.Vector2Add(
 			p.Velocity,
-			rl.Vector2Scale(direction, p.Acceleration),
+			rl.Vector2Scale(direction, p.acceleration),
 		)
 
-		p.Velocity = rl.Vector2ClampValue(p.Velocity, -p.MaxSpeed, p.MaxSpeed)
+		p.Velocity = rl.Vector2ClampValue(p.Velocity, -p.maxSpeed, p.maxSpeed)
 	} else if rl.IsKeyDown(rl.KeyS) {
 		p.Velocity = rl.Vector2Subtract(
 			p.Velocity,
-			rl.Vector2Scale(direction, p.Acceleration),
+			rl.Vector2Scale(direction, p.acceleration),
 		)
 
 		p.Velocity = rl.Vector2ClampValue(p.Velocity, -250, 250)
 	}
 
-	p.Velocity = rl.Vector2Scale(p.Velocity, float32(math.Pow(float64(p.Drag), float64(dt))))
+	p.Velocity = rl.Vector2Scale(p.Velocity, float32(math.Pow(float64(p.drag), float64(dt))))
 
 	p.Position = rl.Vector2Add(
 		p.Position,
@@ -163,11 +163,11 @@ func (p *Player) updatePosition(dt float32) {
 
 func (p *Player) updateRotation(dt float32) {
 	if rl.IsKeyDown(rl.KeyA) {
-		p.Rotation -= p.RotationSpeed * dt
+		p.Rotation -= p.rotationSpeed * dt
 	}
 
 	if rl.IsKeyDown(rl.KeyD) {
-		p.Rotation += p.RotationSpeed * dt
+		p.Rotation += p.rotationSpeed * dt
 	}
 
 	p.Rotation = float32(math.Mod(float64(p.Rotation), 360))
