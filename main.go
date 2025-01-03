@@ -96,23 +96,26 @@ func (a *Asteroid) Update(dt float32) {
 }
 
 type Player struct {
-	Position      rl.Vector2
-	Velocity      rl.Vector2
-	Rotation      float32
-	RotationSpeed float32
-	Acceleration  float32
-	Drag          float32
-	MaxSpeed      float32
+	//Public
+	Position rl.Vector2
+	Velocity rl.Vector2
+	Rotation float32
+
+	//Private
+	rotationSpeed float32
+	acceleration  float32
+	drag          float32
+	maxSpeed      float32
 }
 
 func NewPlayer(posX float32, posY float32, color rl.Color) Player {
 	return Player{
 		Position:      rl.NewVector2(posX, posY),
 		Rotation:      10,
-		RotationSpeed: 300,
-		Acceleration:  5,
-		Drag:          0.3,
-		MaxSpeed:      350,
+		rotationSpeed: 300,
+		acceleration:  5,
+		drag:          0.3,
+		maxSpeed:      350,
 	}
 }
 
@@ -121,6 +124,11 @@ func (p *Player) Draw() {
 }
 
 func (p *Player) Update(dt float32) {
+	p.updateRotation(dt)
+	p.updatePosition(dt)
+}
+
+func (p *Player) updatePosition(dt float32) {
 	rotationRadians := p.Rotation * rl.Deg2rad
 	direction := rl.Vector2{
 		X: float32(math.Cos(float64(rotationRadians))),
@@ -151,7 +159,9 @@ func (p *Player) Update(dt float32) {
 	)
 
 	p.Position = ClampPosition(p.Position, 0, SCREEN_WIDTH, SCREEN_HEIGHT)
+}
 
+func (p *Player) updateRotation(dt float32) {
 	if rl.IsKeyDown(rl.KeyA) {
 		p.Rotation -= p.RotationSpeed * dt
 	}
@@ -161,8 +171,4 @@ func (p *Player) Update(dt float32) {
 	}
 
 	p.Rotation = float32(math.Mod(float64(p.Rotation), 360))
-	// if p.Rotation < 0 {
-	// 	p.Rotation += 360
-	// }
-
 }
