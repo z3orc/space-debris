@@ -3,7 +3,10 @@ name: Build and Update Nightly Release
 on:
   push:
     branches:
-      - main # Change this to your default branch name if it's not "main"
+      - release
+
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -26,12 +29,8 @@ jobs:
       - name: Build Zig Project
         run: zig build --release=fast
 
-      - name: Update Nightly Release
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            zig-out/bin/* # Adjust this path if your executable is elsewhere
-          tag_name: nightly
-          prerelease: true
+      - name: Continuous Build Release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: >-
+          gh release upload ci-build zig-out/bin/space-debris --clobber
