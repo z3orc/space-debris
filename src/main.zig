@@ -9,7 +9,7 @@ const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 pub fn main() !void {
-    rl.initWindow(1280, 720, "Raylib Zig");
+    rl.initWindow(1280, 720, "Space Debris");
     defer rl.closeWindow();
 
     rl.setTargetFPS(120);
