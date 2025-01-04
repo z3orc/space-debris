@@ -33,4 +33,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: >-
-          gh release upload ci-build zig-out/bin/space-debris --clobber
+          gh release upload ci-build zig-out/bin/* --clobber
