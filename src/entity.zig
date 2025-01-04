@@ -19,15 +19,32 @@ pub const Asteroid = struct {
     size: f32,
 
     pub fn create(posX: f32, posY: f32, speed: f32) Asteroid {
-        const angle: f32 = std.crypto.random.float(f32) * 2 * math.pi;
-        const direction: Vector2 = .{
-            .x = math.cos(angle),
-            .y = math.sin(angle),
+        var position = Vector2{
+            .x = posX,
+            .y = posY,
         };
 
+        if (rl.getRandomValue(0, 1) == 0) {
+            position.y = -100;
+            position.x = @floatFromInt(rl.getRandomValue(0, rl.getScreenWidth()));
+        } else {
+            position.y = @floatFromInt(100 + rl.getScreenHeight());
+            position.x = @floatFromInt(rl.getRandomValue(0, rl.getScreenWidth()));
+        }
+
+        const center = Vector2{
+            .x = @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
+            .y = @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
+        };
+
+        const tempVelocity = rlm.vector2Scale(
+            rlm.vector2Normalize(rlm.vector2Subtract(center, position)),
+            speed,
+        );
+
         return Asteroid{
-            .position = .{ .x = posX, .y = posY },
-            .velocity = rlm.vector2Scale(direction, speed),
+            .position = position,
+            .velocity = rlm.vector2Rotate(tempVelocity, @floatFromInt(rl.getRandomValue(-30, 30))),
             .rotation = @mod(std.crypto.random.float(f32), 360),
             .rotationSpeed = 25 + std.crypto.random.float(f32) * 150,
             .size = 15 + std.crypto.random.float(f32) * (64 - 15),
@@ -36,6 +53,7 @@ pub const Asteroid = struct {
 
     pub fn draw(self: *Asteroid) void {
         rl.drawPolyLines(self.position, 5, self.size, self.rotation, color.white);
+        rl.drawLineV(self.position, rlm.vector2Add(self.position, rlm.vector2Scale(self.velocity, 0.5)), color.red);
     }
 
     pub fn update(self: *Asteroid, dt: f32) void {

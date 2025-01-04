@@ -14,19 +14,32 @@ pub fn main() !void {
 
     rl.setTargetFPS(120);
 
-    var asteroids: [32]entity.Asteroid = undefined;
-    for (0..asteroids.len) |idx| {
-        asteroids[idx] = entity.Asteroid.create(
-            @floatFromInt(rl.getRandomValue(0, 1280)),
-            @floatFromInt(rl.getRandomValue(0, 720)),
-            @floatFromInt(rl.getRandomValue(50, 150)),
-        );
-    }
+    var asteroids: [40]entity.Asteroid = undefined;
+    var asteroidCount: usize = 0;
+    var lastSpawnTime: f64 = 0;
+    // for (0..asteroids.len) |idx| {
+    //     asteroids[idx] = entity.Asteroid.create(
+    //         @floatFromInt(rl.getRandomValue(0, 1280)),
+    //         @floatFromInt(rl.getRandomValue(0, 720)),
+    //         @floatFromInt(rl.getRandomValue(50, 150)),
+    //     );
+    // }
 
     while (!rl.windowShouldClose()) {
         rl.beginDrawing();
 
         rl.drawFPS(10, 10);
+
+        if (asteroidCount < 36 and (rl.getTime() - lastSpawnTime) > 0.2) {
+            asteroids[asteroidCount] = entity.Asteroid.create(
+                @floatFromInt(rl.getRandomValue(0, 1280)),
+                @floatFromInt(rl.getRandomValue(0, 720)),
+                @floatFromInt(rl.getRandomValue(50, 150)),
+            );
+
+            asteroidCount += 1;
+            lastSpawnTime = rl.getTime();
+        }
 
         for (&asteroids) |*asteroid| {
             asteroid.update(rl.getFrameTime());
