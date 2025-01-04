@@ -10,28 +10,13 @@ jobs:
     runs-on: windows-latest
 
     steps:
-      # Step 1: Checkout the code
       - name: Checkout repository
         uses: actions/checkout@v3
 
-      # Step 2: Download the Zig compiler
-      - name: Download Zig Compiler
-        run: |
-          $url = 'https://ziglang.org/builds/zig-windows-x86_64-{latest_version}.zip'
-          $output = 'zig.zip'
-          Invoke-WebRequest -Uri $url -OutFile $output
-          Expand-Archive -Path $output -DestinationPath './zig'
-          Remove-Item -Force $output
-
-      # Step 3: Add Zig to PATH
-      - name: Add Zig to PATH
-        run: echo "::add-path::$(Get-Location)/zig/zig-windows-x86_64-{latest_version}"
-
-      # Step 4: Build the Zig project
       - name: Build Zig Project
-        run: zig build -Drelease-safe # Modify this if you have a different build command
+        uses: goto-bus-stop/setup-zig@v2
+        run: zig build -Drelease-safe
 
-      # Step 5: Upload executable to nightly pre-release
       - name: Update Nightly Release
         uses: softprops/action-gh-release@v1
         with:
