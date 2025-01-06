@@ -11,7 +11,9 @@ const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
+var showDebugInfo: bool = true;
 
+var player: entity.Player = undefined;
 var asteroids: [40]entity.Asteroid = undefined;
 var activeAsteroids: usize = 0;
 
@@ -21,35 +23,46 @@ pub fn main() !void {
 
     rl.setTargetFPS(120);
 
-    var showDebugInfo: bool = true;
+    player = entity.Player.new(100, 100, color.red);
     for (0..asteroids.len) |idx| {
         asteroids[idx] = entity.Asteroid.new();
         activeAsteroids += 1;
     }
 
     while (!rl.windowShouldClose()) {
-        rl.beginDrawing();
+        update(rl.getFrameTime());
+        draw();
+    }
+}
 
-        if (showDebugInfo) {
-            rl.drawFPS(10, 10);
-            rl.drawText(INFO_STRING, 10, 40, 20, color.white);
-        }
+pub fn update(dt: f32) void {
+    player.update(dt);
 
-        _ = gui.guiCheckBox(
-            rl.Rectangle{ .height = 20, .width = 20, .x = 5, .y = @floatFromInt(rl.getScreenHeight() - 25) },
-            "Show debug info",
-            &showDebugInfo,
-        );
+    for (&asteroids) |*asteroid| {
+        asteroid.update(dt);
+    }
+}
 
-        for (&asteroids) |*asteroid| {
-            asteroid.update(rl.getFrameTime());
-        }
+pub fn draw() void {
+    rl.beginDrawing();
+    defer rl.endDrawing();
 
-        for (&asteroids) |*asteroid| {
-            asteroid.draw();
-        }
+    rl.clearBackground(color.black);
 
-        rl.clearBackground(color.black);
-        rl.endDrawing();
+    if (showDebugInfo) {
+        rl.drawFPS(10, 10);
+        rl.drawText(INFO_STRING, 10, 40, 20, color.white);
+    }
+
+    _ = gui.guiCheckBox(
+        rl.Rectangle{ .height = 20, .width = 20, .x = 5, .y = @floatFromInt(rl.getScreenHeight() - 25) },
+        "Show debug info",
+        &showDebugInfo,
+    );
+
+    player.draw();
+
+    for (&asteroids) |*asteroid| {
+        asteroid.draw();
     }
 }
