@@ -3,7 +3,7 @@ const builtin = @import("builtin");
 const rl = @import("raylib");
 const gui = @import("raygui");
 
-const entity = @import("entity.zig");
+const entity = @import("entity/entity.zig");
 const rlm = rl.math;
 const math = std.math;
 
@@ -20,8 +20,6 @@ var activeAsteroids: usize = 0;
 pub fn main() !void {
     rl.initWindow(1280, 720, "Space Debris");
     defer rl.closeWindow();
-
-    rl.setTargetFPS(120);
 
     player = entity.Player.new(100, 100, color.red);
     for (0..asteroids.len) |idx| {
@@ -64,5 +62,9 @@ pub fn draw() void {
 
     for (&asteroids) |*asteroid| {
         asteroid.draw();
+
+        if (showDebugInfo) {
+            asteroid.drawDebug();
+        }
     }
 }
