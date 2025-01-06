@@ -18,11 +18,8 @@ pub const Asteroid = struct {
     rotationSpeed: f32,
     size: f32,
 
-    pub fn create(posX: f32, posY: f32, speed: f32) Asteroid {
-        var position = Vector2{
-            .x = posX,
-            .y = posY,
-        };
+    pub fn new() Asteroid {
+        var position = Vector2.zero();
 
         if (rl.getRandomValue(0, 1) == 0) {
             position.y = -100;
@@ -32,11 +29,11 @@ pub const Asteroid = struct {
             position.x = @floatFromInt(rl.getRandomValue(0, rl.getScreenWidth()));
         }
 
+        const speed: f32 = @floatFromInt(rl.getRandomValue(50, 150));
         const center = Vector2{
             .x = @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
             .y = @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
         };
-
         const tempVelocity = rlm.vector2Scale(
             rlm.vector2Normalize(rlm.vector2Subtract(center, position)),
             speed,
