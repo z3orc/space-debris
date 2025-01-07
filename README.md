@@ -5,7 +5,7 @@ An implementation of the game Asteroids using Zig and Raylib.
 - [ ] Player movement & animation
 - [x] Asteroid movement
 - [ ] Random asteroid spawning
-- [ ] Collision
+- [x] Collision
 - [ ] Multiplayer (up to 4)
 - [ ] Debug menu & visualization
 
