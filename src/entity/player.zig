@@ -12,18 +12,27 @@ const PLAYER_ACCELERATION: f32 = 500;
 const PLAYER_MAX_SPEED: f32 = 350;
 const PLAYER_DRAG: f32 = 0.3;
 
+pub const PlayerState = enum {
+    Alive,
+    Dead,
+};
+
 pub const Player = struct {
     position: Vector2,
     velocity: Vector2,
     rotation: f32,
+    size: f32,
     color: Color,
+    state: PlayerState,
 
     pub fn new(posX: f32, posY: f32, color: Color) Player {
         return Player{
             .position = rl.Vector2.init(posX, posY),
             .velocity = rl.Vector2.zero(),
+            .size = 20,
             .rotation = 0,
             .color = color,
+            .state = PlayerState.Alive,
         };
     }
 
@@ -69,6 +78,6 @@ pub const Player = struct {
     }
 
     pub fn draw(self: *Player) void {
-        rl.drawPolyLines(self.position, 3, 16, self.rotation, Color.red);
+        rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
     }
 };

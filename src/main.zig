@@ -3,15 +3,15 @@ const builtin = @import("builtin");
 const rl = @import("raylib");
 const gui = @import("raygui");
 
-const entity = @import("entity/entity.zig");
-const rlm = rl.math;
 const math = std.math;
+const entity = @import("entity/entity.zig");
+const playerState = entity.PlayerState;
 
 const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
-var showDebugInfo: bool = true;
+var showDebugInfo: bool = false;
 
 var player: entity.Player = undefined;
 var asteroids: [40]entity.Asteroid = undefined;
@@ -20,12 +20,9 @@ var activeAsteroids: usize = 0;
 pub fn main() !void {
     rl.initWindow(1280, 720, "Space Debris");
     defer rl.closeWindow();
+    rl.setTargetFPS(120);
 
-    player = entity.Player.new(100, 100, color.red);
-    for (0..asteroids.len) |idx| {
-        asteroids[idx] = entity.Asteroid.new();
-        activeAsteroids += 1;
-    }
+    start();
 
     while (!rl.windowShouldClose()) {
         update(rl.getFrameTime());
@@ -33,11 +30,34 @@ pub fn main() !void {
     }
 }
 
+pub fn start() void {
+    player = entity.Player.new(
+        @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
+        @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
+        color.red,
+    );
+    for (0..asteroids.len) |idx| {
+        asteroids[idx] = entity.Asteroid.new();
+        activeAsteroids += 1;
+    }
+}
+
 pub fn update(dt: f32) void {
+    if (player.state == playerState.Dead) {
+        if (rl.isKeyPressed(rl.KeyboardKey.r)) {
+            start();
+        }
+        return;
+    }
+
     player.update(dt);
 
     for (&asteroids) |*asteroid| {
         asteroid.update(dt);
+
+        if (player.position.distance(asteroid.position) < (player.size + asteroid.size) * 0.8) {
+            player.state = playerState.Dead;
+        }
     }
 }
 
@@ -57,6 +77,19 @@ pub fn draw() void {
         "Show debug info",
         &showDebugInfo,
     );
+
+    if (player.state == playerState.Dead) {
+        const gameoverMessage = "Gameover! Press 'R' to restart!";
+        const gameoverFontSize = 30;
+        rl.drawText(
+            gameoverMessage,
+            @divFloor(rl.getScreenWidth() - rl.measureText(gameoverMessage, gameoverFontSize), 2),
+            @divFloor(rl.getScreenHeight(), 2),
+            gameoverFontSize,
+            color.white,
+        );
+        return;
+    }
 
     player.draw();
 
