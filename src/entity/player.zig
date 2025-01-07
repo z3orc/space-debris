@@ -37,6 +37,10 @@ pub const Player = struct {
     }
 
     pub fn update(self: *Player, dt: f32) void {
+        if (self.state == PlayerState.Dead) {
+            return;
+        }
+
         self.updatePosition(dt);
         self.updateRotation(dt);
     }
@@ -78,6 +82,10 @@ pub const Player = struct {
     }
 
     pub fn draw(self: *Player) void {
+        if (self.state == PlayerState.Dead) {
+            return;
+        }
+
         rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
     }
 };
