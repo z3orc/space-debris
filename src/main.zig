@@ -14,16 +14,6 @@ const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ 
 
 var state: State = undefined;
 
-// var showDebugInfo: bool = false;
-
-// var player: entity.Player = undefined;
-// var playerDeathTime: f64 = undefined;
-
-// var asteroids: [40]entity.Asteroid = undefined;
-// var activeAsteroids: usize = 0;
-
-// var deathSound: rl.Sound = undefined;
-
 pub fn main() !void {
     var gpa = std.heap.GeneralPurposeAllocator(.{}){};
     const allocator = gpa.allocator();
