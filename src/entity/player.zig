@@ -12,9 +12,9 @@ const PLAYER_ACCELERATION: f32 = 500;
 const PLAYER_MAX_SPEED: f32 = 350;
 const PLAYER_DRAG: f32 = 0.3;
 
-pub const PlayerState = enum {
-    Alive,
-    Dead,
+const PlayerStatus = enum {
+    alive,
+    dead,
 };
 
 pub const Player = struct {
@@ -23,7 +23,7 @@ pub const Player = struct {
     rotation: f32,
     size: f32,
     color: Color,
-    state: PlayerState,
+    status: PlayerStatus,
 
     pub fn new(posX: f32, posY: f32, color: Color) Player {
         return Player{
@@ -32,12 +32,12 @@ pub const Player = struct {
             .size = 20,
             .rotation = 0,
             .color = color,
-            .state = PlayerState.Alive,
+            .status = .alive,
         };
     }
 
     pub fn update(self: *Player, dt: f32) void {
-        if (self.state == PlayerState.Dead) {
+        if (self.status == .dead) {
             return;
         }
 
@@ -82,10 +82,10 @@ pub const Player = struct {
     }
 
     pub fn draw(self: *Player) void {
-        if (self.state == PlayerState.Dead) {
-            return;
-        }
-
         rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
+    }
+
+    pub fn isAlive(self: *Player) bool {
+        return self.status == .alive;
     }
 };

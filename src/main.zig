@@ -4,87 +4,145 @@ const rl = @import("raylib");
 const gui = @import("raygui");
 
 const math = std.math;
+const State = @import("state.zig").State;
 const entity = @import("entity/entity.zig");
-const playerState = entity.PlayerState;
 
 const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
-var showDebugInfo: bool = false;
 
-var player: entity.Player = undefined;
-var playerDeathTime: f64 = undefined;
+var state: State = undefined;
 
-var asteroids: [40]entity.Asteroid = undefined;
-var activeAsteroids: usize = 0;
+// var showDebugInfo: bool = false;
 
-var deathSoundBytes = @embedFile("./assets/player_death.wav");
-var deathSound: rl.Sound = undefined;
+// var player: entity.Player = undefined;
+// var playerDeathTime: f64 = undefined;
+
+// var asteroids: [40]entity.Asteroid = undefined;
+// var activeAsteroids: usize = 0;
+
+// var deathSound: rl.Sound = undefined;
 
 pub fn main() !void {
+    var gpa = std.heap.GeneralPurposeAllocator(.{}){};
+    const allocator = gpa.allocator();
+    defer std.debug.assert(gpa.deinit() == .ok);
+
     rl.initWindow(1280, 720, "Space Debris");
     defer rl.closeWindow();
+    rl.setTargetFPS(120);
 
     rl.initAudioDevice();
     defer rl.closeAudioDevice();
 
-    deathSound = rl.loadSoundFromWave(rl.loadWaveFromMemory(".wav", deathSoundBytes));
-    defer rl.unloadSound(deathSound);
-
-    while (!rl.isWindowReady() and !rl.isAudioDeviceReady()) {}
-    rl.setTargetFPS(120);
-
-    start();
+    try initState(allocator);
+    defer state.deinit();
 
     while (!rl.windowShouldClose()) {
-        update(rl.getFrameTime());
+        try update(rl.getFrameTime());
         draw();
     }
 }
 
-pub fn start() void {
-    player = entity.Player.new(
+fn initState(allocator: std.mem.Allocator) !void {
+    state.player = entity.Player.new(
         @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
         @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
         color.red,
     );
 
-    for (0..asteroids.len) |idx| {
-        asteroids[idx] = entity.Asteroid.new();
-        activeAsteroids += 1;
+    state.maxActiveAsteroids = 32;
+    state.asteroidQueue = std.ArrayList(entity.Asteroid).init(allocator);
+    state.asteroids = std.ArrayList(entity.Asteroid).init(allocator);
+    while (state.activeAsteroids < state.maxActiveAsteroids) {
+        try state.asteroids.append(entity.Asteroid.new());
+        state.activeAsteroids += 1;
     }
+
+    state.deathSound = rl.loadSoundFromWave(rl.loadWaveFromMemory(
+        ".wav",
+        @embedFile("./assets/player_death.wav"),
+    ));
+
+    state.gameActive = true;
 }
 
-pub fn update(dt: f32) void {
-    if (player.state == playerState.Dead) {
+fn resetState() !void {
+    state.player = entity.Player.new(
+        @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
+        @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
+        color.red,
+    );
+
+    try state.asteroids.resize(0);
+    while (state.activeAsteroids < state.maxActiveAsteroids) {
+        try state.asteroids.append(entity.Asteroid.new());
+        state.activeAsteroids += 1;
+    }
+
+    state.gameActive = true;
+}
+
+fn update(dt: f32) !void {
+    if (!state.gameActive) {
         if (rl.isKeyPressed(rl.KeyboardKey.r)) {
-            start();
+            try resetState();
         }
     }
 
-    player.update(dt);
+    state.player.update(dt);
 
-    for (&asteroids) |*asteroid| {
+    for (state.asteroids.items) |*asteroid| {
         asteroid.update(dt);
+    }
 
-        if (player.state == playerState.Alive and
-            player.position.distance(asteroid.position) < (player.size + asteroid.size) * 0.6)
-        {
-            player.state = playerState.Dead;
-            playerDeathTime = rl.getTime();
-            rl.playSound(deathSound);
+    for (state.asteroids.items) |asteroid| {
+        const distance = state.player.position.distance(asteroid.position);
+        if (state.gameActive and distance < (state.player.size + asteroid.size) * 0.8) {
+            rl.playSound(state.deathSound);
+            state.player.status = .dead;
+            state.gameEndTime = rl.getTime();
+            state.gameActive = false;
         }
     }
 }
 
-pub fn draw() void {
+fn draw() void {
     rl.beginDrawing();
     defer rl.endDrawing();
 
     rl.clearBackground(color.black);
+    drawDebug();
 
-    if (showDebugInfo) {
+    if (!state.gameActive and (rl.getTime() - state.gameEndTime) > 1) {
+        drawGameover();
+        return;
+    }
+
+    if (state.gameActive) {
+        state.player.draw();
+    }
+
+    for (state.asteroids.items) |*asteroid| {
+        asteroid.draw();
+    }
+}
+
+fn drawGameover() void {
+    const gameoverMessage = "Gameover! Press 'R' to restart!";
+    const gameoverFontSize = 30;
+    rl.drawText(
+        gameoverMessage,
+        @divFloor(rl.getScreenWidth() - rl.measureText(gameoverMessage, gameoverFontSize), 2),
+        @divFloor(rl.getScreenHeight(), 2),
+        gameoverFontSize,
+        color.white,
+    );
+}
+
+fn drawDebug() void {
+    if (state.debug) {
         rl.drawFPS(10, 10);
         rl.drawText(INFO_STRING, 10, 40, 20, color.white);
     }
@@ -92,41 +150,6 @@ pub fn draw() void {
     _ = gui.guiCheckBox(
         rl.Rectangle{ .height = 20, .width = 20, .x = 5, .y = @floatFromInt(rl.getScreenHeight() - 25) },
         "Show debug info",
-        &showDebugInfo,
+        &state.debug,
     );
-
-    //Player dead, and dead for more then 3 secods
-    if (player.state == playerState.Dead and (playerDeathTime + 1) < rl.getTime()) {
-        const gameoverMessage = "Gameover! Press 'R' to restart!";
-        const gameoverFontSize = 30;
-        rl.drawText(
-            gameoverMessage,
-            @divFloor(rl.getScreenWidth() - rl.measureText(gameoverMessage, gameoverFontSize), 2),
-            @divFloor(rl.getScreenHeight(), 2),
-            gameoverFontSize,
-            color.white,
-        );
-
-        return;
-    } else if (player.state == playerState.Dead) {
-        for (&asteroids) |*asteroid| {
-            asteroid.draw();
-
-            if (showDebugInfo) {
-                asteroid.drawDebug();
-            }
-        }
-
-        return;
-    }
-
-    player.draw();
-
-    for (&asteroids) |*asteroid| {
-        asteroid.draw();
-
-        if (showDebugInfo) {
-            asteroid.drawDebug();
-        }
-    }
 }
