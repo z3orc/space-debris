@@ -43,7 +43,7 @@ fn initState(allocator: std.mem.Allocator) !void {
     );
 
     state.maxActiveAsteroids = 32;
-    state.asteroidQueue = std.ArrayList(entity.Asteroid).init(allocator);
+    // state.asteroidQueue = std.ArrayList(entity.Asteroid).init(allocator);
     state.asteroids = std.ArrayList(entity.Asteroid).init(allocator);
     while (state.activeAsteroids < state.maxActiveAsteroids) {
         try state.asteroids.append(entity.Asteroid.new());
@@ -66,9 +66,8 @@ fn resetState() !void {
     );
 
     try state.asteroids.resize(0);
-    while (state.activeAsteroids < state.maxActiveAsteroids) {
+    for (0..state.maxActiveAsteroids) |_| {
         try state.asteroids.append(entity.Asteroid.new());
-        state.activeAsteroids += 1;
     }
 
     state.gameActive = true;
