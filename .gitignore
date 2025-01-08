@@ -2,4 +2,3 @@ bin/
 build/
 zig-out/
 .zig-cache/
-.vscode/
