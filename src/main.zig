@@ -132,6 +132,7 @@ fn drawGameover() void {
 
 fn drawDebug() void {
     if (state.debug) {
+        state.player.drawDebug();
         rl.drawFPS(10, 10);
         rl.drawText(INFO_STRING, 10, 40, 20, color.white);
     }

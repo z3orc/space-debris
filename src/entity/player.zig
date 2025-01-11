@@ -8,8 +8,8 @@ const Color = rl.Color;
 const Key = rl.KeyboardKey;
 
 const PLAYER_ROTATION_SPEED: f32 = 300;
-const PLAYER_ACCELERATION: f32 = 500;
-const PLAYER_MAX_SPEED: f32 = 350;
+const PLAYER_ACCELERATION: f32 = 600;
+const PLAYER_MAX_SPEED: f32 = 450;
 const PLAYER_DRAG: f32 = 0.3;
 
 const PlayerStatus = enum {
@@ -22,6 +22,7 @@ pub const Player = struct {
     velocity: Vector2,
     rotation: f32,
     size: f32,
+    hitbox: f32,
     color: Color,
     status: PlayerStatus,
 
@@ -30,6 +31,7 @@ pub const Player = struct {
             .position = rl.Vector2.init(posX, posY),
             .velocity = rl.Vector2.zero(),
             .size = 20,
+            .hitbox = 20 * 0.8,
             .rotation = 0,
             .color = color,
             .status = .alive,
@@ -83,6 +85,15 @@ pub const Player = struct {
 
     pub fn draw(self: *Player) void {
         rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
+    }
+
+    pub fn drawDebug(self: *Player) void {
+        rl.drawCircle(
+            @intFromFloat(self.position.x),
+            @intFromFloat(self.position.y),
+            self.hitbox,
+            Color.red,
+        );
     }
 
     pub fn isAlive(self: *Player) bool {
