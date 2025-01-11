@@ -9,10 +9,10 @@ const Vector2 = rl.Vector2;
 const Color = rl.Color;
 const Key = rl.KeyboardKey;
 
-const PLAYER_ROTATION_SPEED: f32 = 300;
+const PLAYER_ROTATION_SPEED: f32 = 340;
 const PLAYER_ACCELERATION: f32 = 600;
 const PLAYER_MAX_SPEED: f32 = 450;
-const PLAYER_DRAG: f32 = 0.3;
+const PLAYER_DRAG: f32 = 0.5;
 
 const PlayerStatus = enum {
     alive,
