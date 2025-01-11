@@ -27,7 +27,20 @@ pub fn main() !void {
     rl.initAudioDevice();
     defer rl.closeAudioDevice();
 
-    try initState(allocator);
+    // try initState(allocator);
+    state = try State.init(.{
+        .allocator = allocator,
+        .player = Player.new(
+            @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
+            @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
+            color.red,
+        ),
+        .maxAsteroids = 32,
+        .deathSound = rl.loadSoundFromWave(rl.loadWaveFromMemory(
+            ".wav",
+            @embedFile("./assets/player_death.wav"),
+        )),
+    });
     defer state.deinit();
 
     while (!rl.windowShouldClose()) {
