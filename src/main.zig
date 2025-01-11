@@ -5,7 +5,8 @@ const gui = @import("raygui");
 
 const math = std.math;
 const State = @import("state.zig").State;
-const entity = @import("entity/entity.zig");
+const Player = @import("player.zig").Player;
+const Asteroid = @import("asteroid.zig").Asteroid;
 
 const color = rl.Color;
 const Vector2 = rl.Vector2;
@@ -36,7 +37,7 @@ pub fn main() !void {
 }
 
 fn initState(allocator: std.mem.Allocator) !void {
-    state.player = entity.Player.new(
+    state.player = Player.new(
         @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
         @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
         color.red,
@@ -44,9 +45,9 @@ fn initState(allocator: std.mem.Allocator) !void {
 
     state.maxActiveAsteroids = 32;
     // state.asteroidQueue = std.ArrayList(entity.Asteroid).init(allocator);
-    state.asteroids = std.ArrayList(entity.Asteroid).init(allocator);
+    state.asteroids = std.ArrayList(Asteroid).init(allocator);
     while (state.activeAsteroids < state.maxActiveAsteroids) {
-        try state.asteroids.append(entity.Asteroid.new());
+        try state.asteroids.append(Asteroid.new());
         state.activeAsteroids += 1;
     }
 
@@ -59,7 +60,7 @@ fn initState(allocator: std.mem.Allocator) !void {
 }
 
 fn resetState() !void {
-    state.player = entity.Player.new(
+    state.player = Player.new(
         @floatFromInt(@divFloor(rl.getScreenWidth(), 2)),
         @floatFromInt(@divFloor(rl.getScreenHeight(), 2)),
         color.red,
@@ -67,7 +68,7 @@ fn resetState() !void {
 
     try state.asteroids.resize(0);
     for (0..state.maxActiveAsteroids) |_| {
-        try state.asteroids.append(entity.Asteroid.new());
+        try state.asteroids.append(Asteroid.new());
     }
 
     state.gameActive = true;
@@ -87,8 +88,7 @@ fn update(dt: f32) !void {
     }
 
     for (state.asteroids.items) |asteroid| {
-        const distance = state.player.position.distance(asteroid.position);
-        if (state.gameActive and distance < (state.player.size + asteroid.size) * 0.8) {
+        if (state.player.checkCollision(asteroid)) {
             rl.playSound(state.deathSound);
             state.player.status = .dead;
             state.gameEndTime = rl.getTime();
@@ -135,6 +135,10 @@ fn drawDebug() void {
         state.player.drawDebug();
         rl.drawFPS(10, 10);
         rl.drawText(INFO_STRING, 10, 40, 20, color.white);
+
+        for (state.asteroids.items) |*asteroid| {
+            asteroid.drawDebug();
+        }
     }
 
     _ = gui.guiCheckBox(

@@ -1,6 +1,8 @@
 const std = @import("std");
 const rl = @import("raylib");
 
+const Asteroid = @import("asteroid.zig").Asteroid;
+
 const math = std.math;
 
 const Vector2 = rl.Vector2;
@@ -31,7 +33,7 @@ pub const Player = struct {
             .position = rl.Vector2.init(posX, posY),
             .velocity = rl.Vector2.zero(),
             .size = 20,
-            .hitbox = 20 * 0.8,
+            .hitbox = 20 * 0.6,
             .rotation = 0,
             .color = color,
             .status = .alive,
@@ -98,5 +100,10 @@ pub const Player = struct {
 
     pub fn isAlive(self: *Player) bool {
         return self.status == .alive;
+    }
+
+    pub fn checkCollision(self: *Player, asteroid: Asteroid) bool {
+        const distance = self.position.distance(asteroid.position);
+        return (distance < (self.hitbox + asteroid.hitbox));
     }
 };

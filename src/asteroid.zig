@@ -14,6 +14,7 @@ pub const Asteroid = struct {
     rotation: f32,
     rotationSpeed: f32,
     size: f32,
+    hitbox: f32,
 
     pub fn new() Asteroid {
         var position = Vector2.zero();
@@ -36,12 +37,15 @@ pub const Asteroid = struct {
             speed,
         );
 
+        const size = 15 + std.crypto.random.float(f32) * (64 - 15);
+
         return Asteroid{
             .position = position,
             .velocity = rlm.vector2Rotate(tempVelocity, @floatFromInt(rl.getRandomValue(-30, 30))),
             .rotation = @mod(std.crypto.random.float(f32), 360),
             .rotationSpeed = 25 + std.crypto.random.float(f32) * 150,
-            .size = 15 + std.crypto.random.float(f32) * (64 - 15),
+            .size = size,
+            .hitbox = size * 0.75,
         };
     }
 
@@ -51,6 +55,7 @@ pub const Asteroid = struct {
 
     pub fn drawDebug(self: *Asteroid) void {
         rl.drawLineV(self.position, rlm.vector2Add(self.position, rlm.vector2Scale(self.velocity, 0.5)), Color.red);
+        rl.drawCircleV(self.position, self.hitbox, Color.red);
     }
     pub fn update(self: *Asteroid, dt: f32) void {
         const maxX: f32 = @floatFromInt(rl.getScreenWidth());

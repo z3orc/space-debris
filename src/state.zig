@@ -1,12 +1,13 @@
 const std = @import("std");
 const rl = @import("raylib");
 
-const entity = @import("entity/entity.zig");
+const Player = @import("player.zig").Player;
+const Asteroid = @import("asteroid.zig").Asteroid;
 
 pub const State = struct {
-    player: entity.Player,
-    asteroids: std.ArrayList(entity.Asteroid),
-    asteroidQueue: std.ArrayList(entity.Asteroid),
+    player: Player,
+    asteroids: std.ArrayList(Asteroid),
+    asteroidQueue: std.ArrayList(Asteroid),
     activeAsteroids: usize,
     maxActiveAsteroids: usize,
     deathSound: rl.Sound,
