@@ -2,17 +2,14 @@ const std = @import("std");
 const builtin = @import("builtin");
 const rl = @import("raylib");
 const gui = @import("raygui");
-
 const math = std.math;
 const State = @import("state.zig").State;
 const Player = @import("player.zig").Player;
 const Asteroid = @import("asteroid.zig").Asteroid;
-
 const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
-
 var state: State = undefined;
 
 pub fn main() !void {
@@ -84,6 +81,7 @@ fn resetState() !void {
         try state.asteroids.append(Asteroid.new());
     }
 
+    state.gameEndTime = 0;
     state.gameActive = true;
 }
 
@@ -101,11 +99,12 @@ fn update(dt: f32) !void {
     }
 
     for (state.asteroids.items) |asteroid| {
-        if (state.player.checkCollision(asteroid)) {
+        if (state.gameActive and state.player.checkCollision(asteroid)) {
             rl.playSound(state.deathSound);
             state.player.status = .dead;
             state.gameEndTime = rl.getTime();
             state.gameActive = false;
+            break;
         }
     }
 }
