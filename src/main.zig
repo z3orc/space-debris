@@ -3,10 +3,10 @@ const builtin = @import("builtin");
 const rl = @import("raylib");
 const gui = @import("raygui");
 const math = std.math;
+const color = rl.Color;
 const State = @import("state.zig").State;
 const Player = @import("player.zig").Player;
 const Asteroid = @import("asteroid.zig").Asteroid;
-const color = rl.Color;
 const Vector2 = rl.Vector2;
 
 const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
