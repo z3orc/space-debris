@@ -1,6 +1,6 @@
 # Space Debris
 
-An implementation of the game Asteroids using Zig and Raylib.
+It's a game about dodging asteroids in space. Try to score points by getting close to the asteroids... but not too close!
 
 ## TODO
 
