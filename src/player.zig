@@ -96,25 +96,14 @@ pub const Player = struct {
             Vector2.init(x - 15, y - 10),
             Vector2.init(x, y + 5),
         };
-        // const points = [_]Vector2{
-        //     Vector2.init(100, 110),
-        //     Vector2.init(115, 100),
-        //     Vector2.init(100, 140),
-        //     Vector2.init(85, 100),
-        //     Vector2.init(100, 110),
-        // };
-        std.debug.print("X: {d} Y: {d}\n", .{ self.position.x, self.position.y });
-        // rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
-        //
+
         for (0..points.len) |idx| {
             points[idx] = rotatePoint(points[idx], self.position, self.rotation);
-            // rl.drawLineEx(points[idx], points[(idx + 1) % points.len], 1, Color.red);
         }
+
         for (0..(points.len - 1)) |idx| {
-            // points[idx] = rotatePoint(points[idx], self.position, self.rotation);
             rl.drawLineEx(points[idx], points[(idx + 1) % points.len], 1, Color.red);
         }
-        // rl.drawLineStrip(&points, Color.red);
     }
 
     pub fn drawDebug(self: *Player) void {
