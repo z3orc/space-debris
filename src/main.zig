@@ -9,7 +9,7 @@ const Player = @import("player.zig").Player;
 const Asteroid = @import("asteroid.zig").Asteroid;
 const Vector2 = rl.Vector2;
 
-const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ builtin.target.osArchName() ++ " " ++ builtin.zig_version_string;
+const INFO_STRING = "SPACE DEBRIS DEV 0.1.0 " ++ " ZIG:" ++ builtin.zig_version_string;
 var state: State = undefined;
 
 pub fn main() !void {
@@ -61,7 +61,7 @@ fn initState(allocator: std.mem.Allocator) !void {
     state.asteroids = std.ArrayList(Asteroid).init(allocator);
     while (state.activeAsteroids < state.maxActiveAsteroids) {
         try state.asteroids.append(Asteroid.new());
-        state.activeAsteroids += 1;
+        // state.activeAsteroids += 1;
     }
 
     state.deathSound = rl.loadSoundFromWave(rl.loadWaveFromMemory(
