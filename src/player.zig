@@ -34,7 +34,7 @@ pub const Player = struct {
             .velocity = rl.Vector2.zero(),
             .size = 20,
             .hitbox = 20 * 0.6,
-            .rotation = 0,
+            .rotation = -90,
             .color = color,
             .status = .alive,
         };
@@ -86,7 +86,35 @@ pub const Player = struct {
     }
 
     pub fn draw(self: *Player) void {
-        rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
+        const x = self.position.x;
+        const y = self.position.y;
+
+        var points = [_]Vector2{
+            Vector2.init(x, y + 5),
+            Vector2.init(x + 15, y - 10),
+            Vector2.init(x, y + 20),
+            Vector2.init(x - 15, y - 10),
+            Vector2.init(x, y + 5),
+        };
+        // const points = [_]Vector2{
+        //     Vector2.init(100, 110),
+        //     Vector2.init(115, 100),
+        //     Vector2.init(100, 140),
+        //     Vector2.init(85, 100),
+        //     Vector2.init(100, 110),
+        // };
+        std.debug.print("X: {d} Y: {d}\n", .{ self.position.x, self.position.y });
+        // rl.drawPolyLines(self.position, 3, self.size, self.rotation, Color.red);
+        //
+        for (0..points.len) |idx| {
+            points[idx] = rotatePoint(points[idx], self.position, self.rotation);
+            // rl.drawLineEx(points[idx], points[(idx + 1) % points.len], 1, Color.red);
+        }
+        for (0..(points.len - 1)) |idx| {
+            // points[idx] = rotatePoint(points[idx], self.position, self.rotation);
+            rl.drawLineEx(points[idx], points[(idx + 1) % points.len], 1, Color.red);
+        }
+        // rl.drawLineStrip(&points, Color.red);
     }
 
     pub fn drawDebug(self: *Player) void {
@@ -107,3 +135,20 @@ pub const Player = struct {
         return (distance < (self.hitbox + asteroid.hitbox));
     }
 };
+
+fn rotatePoint(p: Vector2, pos: Vector2, angle: f32) Vector2 {
+    const rotationRadians = (angle - 90) * (math.pi / 180.0);
+    const s = math.sin(rotationRadians);
+    const c = math.cos(rotationRadians);
+
+    const x = p.x - pos.x;
+    const y = p.y - pos.y;
+
+    const newX = (x * c) - (y * s);
+    const newY = (x * s) + (y * c);
+
+    return Vector2{
+        .x = newX + pos.x,
+        .y = newY + pos.y,
+    };
+}
