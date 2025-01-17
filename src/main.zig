@@ -35,14 +35,17 @@ pub fn main() !void {
         .maxAsteroids = 32,
         .deathSound = rl.loadSoundFromWave(rl.loadWaveFromMemory(
             ".wav",
-            @embedFile("./assets/player_death.wav"),
+            @embedFile("./assets/death.wav"),
         )),
+        .pointSound = rl.loadSoundFromWave(
+            rl.loadWaveFromMemory(".wav", @embedFile("./assets/point.wav")),
+        ),
     });
     defer state.deinit();
 
     while (!rl.windowShouldClose()) {
         try update(rl.getFrameTime());
-        draw();
+        try draw(allocator);
     }
 }
 
@@ -99,9 +102,9 @@ fn update(dt: f32) !void {
         asteroid.update(dt);
     }
 
-    for (state.asteroids.items) |asteroid| {
+    for (state.asteroids.items) |*asteroid| {
         if (state.gameActive and
-            state.player.checkCollision(asteroid))
+            state.player.checkCollision(asteroid.*))
         {
             rl.playSound(state.deathSound);
             state.player.status = .dead;
@@ -112,17 +115,20 @@ fn update(dt: f32) !void {
         }
 
         if (state.gameActive and
-            state.player.checkPointCollision(asteroid) and
-            (rl.getTime() - state.lastPointTime) > 0.5)
+            state.player.checkPointCollision(asteroid.*) and
+            (rl.getTime() - state.lastPointTime) > 0.5 and
+            (rl.getTime() - asteroid.lastPointTime) > 2)
         {
             std.debug.print("New hit!\n", .{});
+            rl.playSound(state.pointSound);
+            asteroid.lastPointTime = rl.getTime();
             state.lastPointTime = rl.getTime();
             state.points += 10;
         }
     }
 }
 
-fn draw() void {
+fn draw(allocator: std.mem.Allocator) !void {
     rl.beginDrawing();
     defer rl.endDrawing();
 
@@ -130,12 +136,13 @@ fn draw() void {
     drawDebug();
 
     if (!state.gameActive and (rl.getTime() - state.gameEndTime) > 1) {
-        drawGameover();
+        try drawGameover(allocator);
         return;
     }
 
     if (state.gameActive) {
         state.player.draw();
+        try drawScore(allocator);
     }
 
     for (state.asteroids.items) |*asteroid| {
@@ -143,16 +150,42 @@ fn draw() void {
     }
 }
 
-fn drawGameover() void {
-    const gameoverMessage = "Gameover! Press 'R' to restart!";
-    const gameoverFontSize = 30;
+fn drawScore(allocator: std.mem.Allocator) !void {
+    const text = try std.fmt.allocPrintZ(allocator, "SCORE: {d}\n", .{state.points});
+    const posX = rl.getScreenWidth() - rl.measureText(text, 30) - 30;
     rl.drawText(
-        gameoverMessage,
-        @divFloor(rl.getScreenWidth() - rl.measureText(gameoverMessage, gameoverFontSize), 2),
-        @divFloor(rl.getScreenHeight(), 2),
-        gameoverFontSize,
+        text,
+        posX,
+        30,
+        30,
         color.white,
     );
+
+    allocator.free(text);
+}
+
+fn drawGameover(allocator: std.mem.Allocator) !void {
+    const scoreMessage = try std.fmt.allocPrintZ(allocator, "FINAL SCORE: {d}", .{state.points});
+    const gameoverMessage = "Gameover! Press 'R' to restart!";
+    const fontSize = 30;
+
+    rl.drawText(
+        scoreMessage,
+        @divFloor(rl.getScreenWidth() - rl.measureText(scoreMessage, fontSize), 2),
+        @divFloor(rl.getScreenHeight(), 2) - (fontSize + 20),
+        fontSize,
+        color.white,
+    );
+
+    rl.drawText(
+        gameoverMessage,
+        @divFloor(rl.getScreenWidth() - rl.measureText(gameoverMessage, fontSize), 2),
+        @divFloor(rl.getScreenHeight(), 2),
+        fontSize,
+        color.white,
+    );
+
+    allocator.free(scoreMessage);
 }
 
 fn drawDebug() void {

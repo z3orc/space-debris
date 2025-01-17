@@ -9,6 +9,7 @@ pub const StateConfig = struct {
     player: Player,
     maxAsteroids: usize,
     deathSound: rl.Sound,
+    pointSound: rl.Sound,
 };
 
 pub const State = struct {
@@ -18,6 +19,7 @@ pub const State = struct {
     activeAsteroids: usize,
     maxActiveAsteroids: usize,
     deathSound: rl.Sound,
+    pointSound: rl.Sound,
     debug: bool = false,
     points: i16 = 0,
     lastPointTime: f64 = 0, //Time since last point in seconds
@@ -32,6 +34,7 @@ pub const State = struct {
             .activeAsteroids = 0,
             .maxActiveAsteroids = config.maxAsteroids,
             .deathSound = config.deathSound,
+            .pointSound = config.pointSound,
             .gameActive = true,
         };
 

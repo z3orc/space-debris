@@ -16,6 +16,7 @@ pub const Asteroid = struct {
     size: f32,
     hitbox: f32,
     pointHitbox: f32,
+    lastPointTime: f64 = 0, //time since last point in seconds
 
     pub fn new() Asteroid {
         var position = Vector2.zero();
