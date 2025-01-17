@@ -19,6 +19,8 @@ pub const State = struct {
     maxActiveAsteroids: usize,
     deathSound: rl.Sound,
     debug: bool = false,
+    points: i16 = 0,
+    lastPointTime: f64 = 0, //Time since last point in seconds
     gameActive: bool = false,
     gameEndTime: f64 = 0,
 

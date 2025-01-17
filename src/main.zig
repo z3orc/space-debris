@@ -82,6 +82,7 @@ fn resetState() !void {
     }
 
     state.gameEndTime = 0;
+    state.points = 0;
     state.gameActive = true;
 }
 
@@ -99,12 +100,24 @@ fn update(dt: f32) !void {
     }
 
     for (state.asteroids.items) |asteroid| {
-        if (state.gameActive and state.player.checkCollision(asteroid)) {
+        if (state.gameActive and
+            state.player.checkCollision(asteroid))
+        {
             rl.playSound(state.deathSound);
             state.player.status = .dead;
             state.gameEndTime = rl.getTime();
             state.gameActive = false;
+            std.debug.print("POINTS: {d}\n", .{state.points});
             break;
+        }
+
+        if (state.gameActive and
+            state.player.checkPointCollision(asteroid) and
+            (rl.getTime() - state.lastPointTime) > 0.5)
+        {
+            std.debug.print("New hit!\n", .{});
+            state.lastPointTime = rl.getTime();
+            state.points += 10;
         }
     }
 }

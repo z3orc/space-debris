@@ -23,8 +23,9 @@ pub const Player = struct {
     position: Vector2,
     velocity: Vector2,
     rotation: f32,
-    size: f32,
-    hitbox: f32,
+    size: f32 = 20,
+    hitbox: f32 = 20 * 0.6,
+    pointHitbox: f32 = 20 * 1.4,
     color: Color,
     status: PlayerStatus,
 
@@ -32,8 +33,6 @@ pub const Player = struct {
         return Player{
             .position = rl.Vector2.init(posX, posY),
             .velocity = rl.Vector2.zero(),
-            .size = 20,
-            .hitbox = 20 * 0.6,
             .rotation = -90,
             .color = color,
             .status = .alive,
@@ -90,11 +89,11 @@ pub const Player = struct {
         const y = self.position.y;
 
         var points = [_]Vector2{
-            Vector2.init(x, y + 5),
-            Vector2.init(x + 15, y - 10),
+            Vector2.init(x, y - 5),
+            Vector2.init(x + 15, y - 15),
             Vector2.init(x, y + 20),
-            Vector2.init(x - 15, y - 10),
-            Vector2.init(x, y + 5),
+            Vector2.init(x - 15, y - 15),
+            Vector2.init(x, y - 5),
         };
 
         for (0..points.len) |idx| {
@@ -113,6 +112,8 @@ pub const Player = struct {
             self.hitbox,
             Color.red,
         );
+        rl.drawCircleLinesV(self.position, self.pointHitbox, Color.blue);
+        rl.drawPixelV(self.position, Color.red);
     }
 
     pub fn isAlive(self: *Player) bool {
@@ -122,6 +123,11 @@ pub const Player = struct {
     pub fn checkCollision(self: *Player, asteroid: Asteroid) bool {
         const distance = self.position.distance(asteroid.position);
         return (distance < (self.hitbox + asteroid.hitbox));
+    }
+
+    pub fn checkPointCollision(self: *Player, asteroid: Asteroid) bool {
+        const distance = self.position.distance(asteroid.position);
+        return (distance < (self.pointHitbox + asteroid.pointHitbox));
     }
 };
 
